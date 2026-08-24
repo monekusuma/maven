@@ -1,7 +1,5 @@
 pipeline{
-    agent{
-        label 'myslave'
-    }
+    agent any
     stages{
         stage('Download'){
             steps{
