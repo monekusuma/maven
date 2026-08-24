@@ -1,33 +1,49 @@
-pipeline{
+@Library('mylibrary') _
+
+pipeline {
     agent any
-    stages{
-        stage('Download'){
-            steps{
-                git 'https://github.com/IntelliqDevops/maven.git'
+
+    stages {
+
+        stage('Download') {
+            steps {
+                script {
+                    cicd.gitDownload("maven")
+                }
             }
         }
-        stage('Build'){
-            steps{
-                sh 'mvn package'
+
+        stage('build') {
+            steps {
+                script {
+                    cicd.buildArtifact()
+                }
             }
         }
-        stage('Deploy'){
-            steps{
-                sh 'scp /home/ubuntu/myfolder/workspace/DeclarativePipelineOnSlave1/webapp/target/webapp.war ubuntu@172.31.34.104:/var/lib/tomcat10/webapps/testapp1'
+
+        stage('Deployment') {
+            steps {
+                script {
+                    cicd.deployToTomcat("172.31.34.104", "testapp")
+                }
             }
         }
-            stage('tesing'){
-                steps{
+
+        stage('testing') {
+            steps {
+                script {
                     git 'https://github.com/IntelliqDevops/FunctionalTesting.git'
-                    sh 'java -jar /home/ubuntu/myfolder/workspace/DeclarativePipelineOnSlave1/testing.jar'
+                    cicd.runSelenium()
                 }
             }
-            stage('Delivery'){
-                steps{
-                    sh 'scp /home/ubuntu/myfolder/workspace/DeclarativePipelineOnSlave1/webapp/target/webapp.war ubuntu@172.31.45.128:/var/lib/tomcat10/webapps/prodapp'
+        }
+
+        stage('Delivery') {
+            steps {
+                script {
+                    cicd.deployToTomcat("172.31.45.128", "prodapp")
                 }
             }
-            
         }
     }
-
+}
